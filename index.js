@@ -321,7 +321,7 @@ if(argv.r){
             if(err) {
                 console.error(err);
             } else {
-                console.log('successfully write swagger file to ' + outputFile);
+                console.log('successfully added swagger.json to ' + outputFile);
             }
         });
     })
@@ -362,7 +362,7 @@ if(argv.r){
         if(err) {
             console.error(err);
         } else {
-            console.log('successfully write swagger file to ' + outputFile);
+            console.log('successfully added swagger.json to ' + outputFile);
         }
     });
 }
