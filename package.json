@@ -1,0 +1,33 @@
+{
+  "name": "@naeemark/joi-to-swagger",
+  "version": "0.1.0",
+  "description": "generate swagger.json file from joi schema file",
+  "keywords": [
+    "swagger",
+    "joi",
+    "converter"
+  ],
+  "homepage": "https://github.com/naeemark/joi-to-swagger",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js",
+    "test": "joi-swagger-generator -v ./test/validator.js -h ./test/header.json -o ./test/swagger.json",
+    "test-recursive": "joi-swagger-generator -r -v ./test/ -h ./test/header.json -o ./test/swagger.json",
+    "help": "joi-swagger-generator --help"
+  },
+  "author": "Naeem",
+  "preferGlobal": true,
+  "main": "./index.js",
+  "bin": {
+    "joi-swagger-generator": "./index.js"
+  },
+  "dependencies": {
+    "fs-extra": "^6.0.1",
+    "glob": "^7.1.2",
+    "joi": "^14.3.1",
+    "joi-phone-number": "^2.0.9",
+    "joi-to-swagger": "^3.0.0",
+    "yargs": "^11.0.0"
+  },
+  "devDependencies": {}
+}
