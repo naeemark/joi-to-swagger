@@ -26,35 +26,16 @@ const glob = require("glob")
 String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
-const baseUrl = argv.baseUrl ? argv.baseUrl : "http://${stageVariables.url}";
 const relativeValidatorPath = argv.validator;
 const validatorFile = path.resolve(relativeValidatorPath);
 
 function applyLogic(json, apiList){
-    const basePath = json.basePath;
-    json.info.title = json.info.title + " [" + process.env.NODE_ENV+ "]";
-    json.info.description = json.info.description + " for " + process.env.NODE_ENV + " environment";
+    const basePath = json.basePath;      
+    json.info.description = "<b>Environment: `" + process.env.NODE_ENV+ "` </b><br /><br />" + json.info.description;
 
     json.paths = {};
     json.definitions = {};
-    json['x-amazon-apigateway-gateway-responses'] = {
-    "DEFAULT_4XX": {
-      "responseParameters": {
-        "gatewayresponse.header.Access-Control-Allow-Origin": "'*'"
-      },
-      "responseTemplates": {
-        "application/json": "{\"message\":$context.error.messageString}"
-      }
-    },
-    "DEFAULT_5XX": {
-      "responseParameters": {
-        "gatewayresponse.header.Access-Control-Allow-Origin": "'*'"
-      },
-      "responseTemplates": {
-        "application/json": "{\"message\":$context.error.messageString}"
-      }
-    }
-  }
+   
     for(key in apiList) {
         const mapHeader = {};
         const requestMap = {};
@@ -62,15 +43,6 @@ function applyLogic(json, apiList){
 
         let paths;
         let convertedPath = path.join(basePath, currentValue.path);
-        // const splitPath = convertedPath.split('/');
-        // for(const i in splitPath){
-        //     let eachPath = splitPath[i];
-        //     if(eachPath.startsWith(":")){
-        //         eachPath = eachPath.substr(1); //remove :
-        //         eachPath = "{" + eachPath + "}";//make {path}
-        //         splitPath[i] = eachPath;
-        //     }
-        // }
         convertedPath = convertPath(convertedPath);
 
         if(argv.apiGatewayPath){
@@ -92,23 +64,7 @@ function applyLogic(json, apiList){
         }
 
         let parameters = []
-        //default response
-        let responses = {
-            '200': {
-                description: 'Default response for CORS method',
-                headers: {
-                    'Access-Control-Allow-Headers': {
-                        type: 'string'
-                    },
-                    'Access-Control-Allow-Methods': {
-                        type: 'string'
-                    },
-                    'Access-Control-Allow-Origin': {
-                        type: 'string'
-                    }
-                }
-            }
-        };
+        let responses = {};
         let deprecated = false
 
         if(!currentValue.JoiSchema){
@@ -203,16 +159,7 @@ function applyLogic(json, apiList){
                     if(statusCode >= 200 && statusCode < 400){
                         if(!data.headers){
                             data.headers = {};
-                        }
-                        data.headers['Access-Control-Allow-Headers'] = {
-                            type: 'string'
-                        };
-                        data.headers['Access-Control-Allow-Methods'] = {
-                            type: 'string'
-                        };
-                        data.headers['Access-Control-Allow-Origin'] = {
-                            type: 'string'
-                        };
+                        }                    
                     }
                     responses[statusCode] = data;
                 }
@@ -223,26 +170,12 @@ function applyLogic(json, apiList){
             }
         }
 
-        let apiGateway, corsApiGateway;
-        if(argv.mapPath){
-            let editedPath = path.join(argv.mapPath, currentValue.path);
-            editedPath = convertPath(editedPath);
-
-            apiGateway = getApiGatewayIntegration(currentValue, editedPath, mapHeader, requestMap);
-            corsApiGateway = getCorsApiGatewayIntegration(editedPath, mapHeader, requestMap);
-        } else {
-            apiGateway = getApiGatewayIntegration(currentValue, convertedPath, mapHeader, requestMap);
-            corsApiGateway = getCorsApiGatewayIntegration(convertedPath, mapHeader, requestMap);
-        }
-
         const queryParameters = parameters.filter(param => param.in === 'query').map(param => `method.request.querystring.${param.name}`)
         const pathParameters  = parameters.filter(param => param.in === 'path').map(param => `method.request.path.${param.name}`)
-        // Cache in staging and production by default
-        if (['staging', 'production'].includes(process.env.NODE_ENV)) {
-            apiGateway['cacheKeyParameters'] = [...queryParameters, ...pathParameters]
-        }
+        
         paths[currentValue.type] = {
             summary: currentValue.name,
+            tags: currentValue.tags,
             consumes: [
                 'application/json'
             ],
@@ -252,37 +185,6 @@ function applyLogic(json, apiList){
             parameters,
             responses,
             deprecated,
-            "x-amazon-apigateway-integration": apiGateway
-        }
-
-        if(!paths.options){
-            paths['options'] = {
-                summary: 'CORS Support',
-                consumes: [
-                    'application/json'
-                ],
-                produces: [
-                    'application/json'
-                ],
-                parameters,
-                "x-amazon-apigateway-integration": corsApiGateway,
-                responses: {
-                    '200': {
-                        description: 'Default response for CORS method',
-                        headers: {
-                            'Access-Control-Allow-Headers': {
-                                type: 'string'
-                            },
-                            'Access-Control-Allow-Methods': {
-                                type: 'string'
-                            },
-                            'Access-Control-Allow-Origin': {
-                                type: 'string'
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
     return json;
@@ -321,7 +223,7 @@ if(argv.r){
             if(err) {
                 console.error(err);
             } else {
-                console.log('successfully added swagger.json to ' + outputFile);
+                console.log('Successfully added: ' + outputFile);
             }
         });
     })
@@ -362,13 +264,13 @@ if(argv.r){
         if(err) {
             console.error(err);
         } else {
-            console.log('successfully added swagger.json to ' + outputFile);
+            console.log('Successfully added: ' + outputFile);
         }
     });
 }
 
-function convertPath(editedPath){
-    const splitPath = editedPath.split('/');
+function convertPath(path){
+    const splitPath = path.split('/');
     for(const i in splitPath){
         let eachPath = splitPath[i];
         if(eachPath.startsWith(":")){
@@ -377,73 +279,6 @@ function convertPath(editedPath){
             splitPath[i] = eachPath;
         }
     }
-    editedPath = splitPath.join('/');
-    return editedPath;
-}
-
-function getApiGatewayIntegration(currentValue, convertedPath, mapHeader, requestMap){
-    const apiGateway = {
-        passthroughBehavior: "when_no_match",
-        httpMethod: currentValue.type,
-        type: "http_proxy",
-        uri: baseUrl + convertedPath,
-        responses: {
-            default: {
-                statusCode: '200',
-                responseParameters: {
-                    'method.response.header.Access-Control-Allow-Headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'",
-                    'method.response.header.Access-Control-Allow-Methods': "'*'",
-                    'method.response.header.Access-Control-Allow-Origin': "'*'"
-                }
-            }
-        }
-    }
-    let requestPath = {...requestMap};
-    const splitPath = convertedPath.split('/');
-    for(const i in splitPath){
-        let eachPath = splitPath[i];
-        if(eachPath.startsWith("{") && eachPath.endsWith("}")){
-            const pathName = eachPath.slice(1, -1);
-            const keyName = "integration.request.path." + pathName;
-            const valueName = "method.request.path." + pathName;
-            requestPath[keyName] = valueName;
-        }
-    }
-    apiGateway["requestParameters"] = requestPath;
-    apiGateway["responseParameters"] = mapHeader;
-    return apiGateway;
-}
-
-function getCorsApiGatewayIntegration(convertedPath, mapHeader, requestMap){
-    const apiGateway = {
-        passthroughBehavior: "when_no_match",
-        httpMethod: "options",
-        type: "http_proxy",
-        uri: baseUrl + convertedPath,
-        responses: {
-            default: {
-                statusCode: '200',
-                responseParameters: {
-                    'method.response.header.Access-Control-Allow-Headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'",
-                    'method.response.header.Access-Control-Allow-Methods': "'*'",
-                    'method.response.header.Access-Control-Allow-Origin': "'*'"
-                }
-            }
-        }
-    }
-    let requestPath = {...requestMap};
-    const splitPath = convertedPath.split('/');
-    for(const i in splitPath){
-        let eachPath = splitPath[i];
-        if(eachPath.startsWith("{") && eachPath.endsWith("}")){
-            const pathName = eachPath.slice(1, -1);
-            const keyName = "integration.request.path." + pathName;
-            const valueName = "method.request.path." + pathName;
-            requestPath[keyName] = valueName;
-        }
-    }
-
-    apiGateway["requestParameters"] = requestPath;
-    apiGateway["responseParameters"] = mapHeader;
-    return apiGateway;
+    path = splitPath.join('/');
+    return path;
 }

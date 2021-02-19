@@ -1,6 +1,6 @@
 {
   "name": "@naeemark/joi-to-swagger",
-  "version": "0.1.2",
+  "version": "0.1.6",
   "description": "generate swagger.json file from joi schema file",
   "keywords": [
     "swagger",
