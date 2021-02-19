@@ -13,7 +13,7 @@ The basePath will be join together with the path in validator class, in the exam
         "version": "1.0.0",
         "title": "Identity Service",
         "contact": {
-            "email": "stephen_adipradhana@astro.com.my"
+            "email": "me@email.com"
         }
     },
     "basePath": "/users",
@@ -28,7 +28,7 @@ First way is to define 1 specific file that will export all the apiList
 
 You can install the package globally or just include them in the scripts in the package.json
 ```
-    "swagger-generator": "joi-swagger-generator -v ./utils/validator.js -h ./swagger/header.json -o ./swagger/swagger.json"
+    "swagger-generator": "joi-to-swagger -v ./utils/validator.js -h ./swagger/header.json -o ./swagger/swagger.json"
 ```
 ```
 -h is the path to the header file
@@ -99,7 +99,7 @@ module.exports =  {
 
 Second way is to define the directory, and the library will recursively look for *.validator.js files. Just add -r in the command to enable this option
 ```
-joi-swagger-generator -r -v ./utils/ -h ./swagger/header.json -o ./swagger/swagger.json
+joi-to-swagger -r -v ./utils/ -h ./swagger/header.json -o ./swagger/swagger.json
 ```
 
 Example for multiple validator file
@@ -160,7 +160,7 @@ Result example
         "version": "1.0.0",
         "title": "Identity Service",
         "contact": {
-            "email": "stephen_adipradhana@astro.com.my"
+            "email": "me@email.com"
         }
     },
     "basePath": "/users",

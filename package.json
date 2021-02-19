@@ -1,6 +1,6 @@
 {
   "name": "@naeemark/joi-to-swagger",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "generate swagger.json file from joi schema file",
   "keywords": [
     "swagger",
@@ -11,15 +11,15 @@
   "license": "MIT",
   "scripts": {
     "start": "node index.js",
-    "test": "joi-swagger-generator -v ./test/validator.js -h ./test/header.json -o ./test/swagger.json",
-    "test-recursive": "joi-swagger-generator -r -v ./test/ -h ./test/header.json -o ./test/swagger.json",
-    "help": "joi-swagger-generator --help"
+    "test": "joi-to-swagger -v ./test/validator.js -h ./test/header.json -o ./test/swagger.json",
+    "test-recursive": "joi-to-swagger -r -v ./test/ -h ./test/header.json -o ./test/swagger.json",
+    "help": "joi-to-swagger --help"
   },
   "author": "Naeem",
   "preferGlobal": true,
   "main": "./index.js",
   "bin": {
-    "joi-swagger-generator": "./index.js"
+    "joi-to-swagger": "./index.js"
   },
   "dependencies": {
     "fs-extra": "^6.0.1",

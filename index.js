@@ -15,7 +15,7 @@ const argv = require('yargs')
             .describe('g', 'Api Gateway base path')
             .demandOption(['v','o','h'])
             .help('help')
-            .example('joi-swagger-generator -r -v ./validators -h ./header.json -o ./swagger.json')
+            .example('joi-to-swagger -r -v ./validators -h ./header.json -o ./swagger.json')
             .argv
 
 const j2s = require('joi-to-swagger');
@@ -409,8 +409,6 @@ function getApiGatewayIntegration(currentValue, convertedPath, mapHeader, reques
             requestPath[keyName] = valueName;
         }
     }
-
-    console.log(requestPath)
     apiGateway["requestParameters"] = requestPath;
     apiGateway["responseParameters"] = mapHeader;
     return apiGateway;
